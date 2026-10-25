@@ -2,7 +2,7 @@
 
 ## Situation
 
-The project compares an already trained TimesFM 3.0 checkpoint with a weekly rule and a fitted gradient boosting model on grocery sales. The LinkedIn post, full account, dashboard and saved results should tell the same story. This review checks that agreement and the calculations behind it.
+The project compares an already trained TimesFM 3.0 checkpoint with a weekly rule and a fitted gradient boosting model on grocery sales. The documentation, dashboard and saved results should agree. This review checks that agreement and the calculations behind it.
 
 ## Task
 
@@ -20,11 +20,11 @@ Code inspection confirmed that gradient boosting's training-label mask ends befo
 
 ## Result
 
-The saved arithmetic checks and six integrity tests pass. The headline WAPE values remain 9.68% for calendar-aware TimesFM, 12.56% for the weekly rule and 9.69% for gradient boosting. The product-group ranking in the post agrees with the saved scores. The supplied-input bundle scores 9.99%, so the claim that it did not improve the calendar configuration is supported for this run.
+The saved arithmetic checks and six integrity tests pass. The headline WAPE values remain 9.68% for calendar-aware TimesFM, 12.56% for the weekly rule and 9.69% for gradient boosting. The documented product-group ranking agrees with the saved scores. The supplied-input bundle scores 9.99%, so the claim that it did not improve the calendar configuration is supported for this run.
 
 Calendar TimesFM's middle-80% interval covers 87.8% of outcomes, compared with 86.2% for gradient boosting. Its average width is 573.67 source quantity units, compared with 615.68. Mean nine-quantile pinball loss, a score penalizing quantile errors, is 56.78 versus 56.67, with lower better. These numbers provide no clear overall uncertainty winner. Pooled widths and losses also reflect the different product-group scales. Requesting prediction intervals does not itself improve a model's point forecasts.
 
-The post now defines WAPE and identifies the unequal inputs. The long account uses Situation, Task, Analysis and Result. The saved checker output is `results/review_audit.json`.
+The documentation defines WAPE and identifies the unequal inputs. The long account uses Situation, Task, Analysis and Result. The saved checker output is `results/review_audit.json`.
 
 The main remaining limits are substantive:
 

@@ -6,3 +6,8 @@ checkpoints/
 .DS_Store
 data/retail_panel.csv
 artifact_manifest.json
+
+# Writing drafts stay outside the implementation repository.
+docs/LINKEDIN*
+docs/INTERVIEW_ANSWER.md
+drafts/

@@ -133,7 +133,7 @@ The downloadable TimesFM 3.0 weights have a non-commercial, non-production licen
 
 ## Read or reproduce the project
 
-Open `portfolio_report.html` for the plain-language dashboard. It works offline and explores saved forecasts. The full explanation above follows Situation, Task, Analysis, and Result. The short interview answer and LinkedIn draft are in `docs/`.
+Open `portfolio_report.html` for the plain-language dashboard. It works offline and explores saved forecasts. The full explanation above follows Situation, Task, Analysis, and Result.
 
 ### Files to start with
 
@@ -143,8 +143,6 @@ Open `portfolio_report.html` for the plain-language dashboard. It works offline 
 | `docs/REVIEW.md` | What was checked and which claims remain limited |
 | `src/review_evidence.py` | A separate arithmetic check of the saved evidence |
 | `docs/METHODS.md` | Exact methods, assumptions, and limits of the claims |
-| `docs/INTERVIEW_ANSWER.md` | A short STAR answer |
-| `docs/LINKEDIN_POST.md` | A short post inviting feedback |
 | `project_walkthrough.ipynb` | Executed checks and analysis of saved outputs |
 | `results/forecast_metrics.csv` | Forecast scores for all six configurations |
 | `results/metrics_by_family.csv` | Where each method did well or poorly |
