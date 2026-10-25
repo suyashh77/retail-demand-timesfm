@@ -18,7 +18,7 @@ The aim was to compare TimesFM with a simple weekly forecast and a conventional 
 
 There are several established ways to forecast retail sales. A store might begin by expecting next Wednesday to resemble last Wednesday. Exponential smoothing estimates a changing sales level and seasonal pattern. ARIMA uses relationships between earlier observations and their changes. Regression and tree-based models can learn from inputs such as recent sales, weekday, and promotion plans. These approaches fit their patterns to the available business data. [3]
 
-This project tests two alternatives: the weekly-repeat rule and gradient boosting, a machine-learning method built from decision trees. ARIMA and exponential smoothing provide background context here. They were not run, so this experiment cannot establish that TimesFM beats them.
+This project tests two alternatives: the weekly-repeat rule and gradient boosting, a machine-learning method that combines many small decision rules. ARIMA and exponential smoothing provide background context here. They were not run, so this experiment cannot establish that TimesFM beats them.
 
 The main difference in this comparison is how the models obtain their patterns. The gradient boosting model learns from this retail dataset. TimesFM arrives with patterns learned during Google's earlier training. In this project, its model weights remain unchanged.
 

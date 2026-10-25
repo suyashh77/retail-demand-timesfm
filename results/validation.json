@@ -7,5 +7,10 @@
   "static_figures": "overview and held-out forecasts visually inspected",
   "browser_rendering": "not verified: in-app browser could not reach local preview",
   "official_checkpoint_sha256_verified": true,
-  "notebook_analysis_code_cells_executed": 6
+  "notebook_analysis_code_cells_executed": 6,
+  "published_forecast_metrics_recomputed": true,
+  "published_inventory_replay_recomputed": true,
+  "fresh_github_checkout_analysis_reproduced": true,
+  "fresh_github_checkout_integrity_tests": "passed",
+  "fresh_github_checkout_report_logic": "passed"
 }

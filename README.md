@@ -18,7 +18,7 @@ The aim was to compare TimesFM with a simple weekly forecast and a conventional 
 
 There are several established ways to forecast retail sales. A store might begin by expecting next Wednesday to resemble last Wednesday. Exponential smoothing estimates a changing sales level and seasonal pattern. ARIMA uses relationships between earlier observations and their changes. Regression and tree-based models can learn from inputs such as recent sales, weekday, and promotion plans. These approaches fit their patterns to the available business data. [3]
 
-This project tests two alternatives: the weekly-repeat rule and gradient boosting, a machine-learning method built from decision trees. ARIMA and exponential smoothing provide background context here. They were not run, so this experiment cannot establish that TimesFM beats them.
+This project tests two alternatives: the weekly-repeat rule and gradient boosting, a machine-learning method that combines many small decision rules. ARIMA and exponential smoothing provide background context here. They were not run, so this experiment cannot establish that TimesFM beats them.
 
 The main difference in this comparison is how the models obtain their patterns. The gradient boosting model learns from this retail dataset. TimesFM arrives with patterns learned during Google's earlier training. In this project, its model weights remain unchanged.
 
@@ -182,5 +182,7 @@ node tests/verify_report.cjs portfolio_report.html
 ```
 
 Six integrity tests passed on the recorded project. The report script was checked across 288 product/method/start-date selections and cost-slider scenarios using a local test harness. That is a logic check, rather than full browser layout verification. Static result figures were visually inspected. The local browser preview was unavailable in the execution environment.
+
+The data preparation, saved-result recomputation, six integrity tests, and report-control checks also passed from a fresh GitHub checkout using the pinned source data. That check did not rerun the large model, whose original inference outputs are saved in the repository.
 
 This is an AI-assisted research implementation. Saved predictions came from executing the official TimesFM checkpoint. Scores and the inventory replay were recomputed from those outputs. The repository supports review and reproduction, while the single-store design and data-availability assumptions limit the conclusions.
