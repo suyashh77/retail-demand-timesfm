@@ -79,7 +79,7 @@ print('\\nNon-overlapping next-week scores:')
 print(pd.read_csv(root / 'results' / 'next_week_metrics.csv')[['model', 'wape']].round(4).to_string(index=False))''')
     markdown('''![Forecast and inventory comparison](results/figures/results_overview.png)
 
-Calendar-aware TimesFM and gradient boosting are essentially tied. Additional promotion and historical transaction channels did not improve the calendar-only model here. These fixed ablations cannot identify the separate causal effect of promotions or traffic.''')
+Calendar-aware TimesFM and gradient boosting have very close observed overall scores; no statistical equivalence test was conducted. Gradient boosting receives promotion and transaction inputs absent from calendar-only TimesFM. Additional promotion and historical transaction channels did not improve the calendar-only model here. These fixed ablations cannot identify the separate causal effect of promotions or traffic.''')
     markdown('''## 3. Inspect a saved held-out forecast
 
 These values are actual saved outputs from the official checkpoint, not generated example numbers. The offline report adds selectors for family, origin, and configuration.''')

@@ -44,7 +44,7 @@ Gradient boosting uses one `HistGradientBoostingRegressor` per family, refitted 
 
 TimesFM configurations are independent single-target forecasts, four-target forecasts, four-target forecasts plus calendar, and four-target forecasts plus calendar/promotions/past transactions. The last configuration changes promotions and past transactions together. It does not isolate their effects. All configurations use official evaluator options: `use_symmetric_averaging=False`, `make_positive=True`, `sort_quantiles=True`, `use_znorm=False`, and `padding_mode="none"`. Native targets are nonnegative. The point forecast is the sorted median quantile.
 
-These are comparisons of specified workflows. They are not comparisons at equal training-data volume, fitting budget, parameter count, or total computation. TimesFM has upstream pretraining, the fitted comparator uses a year of labels with recent summary features, and seasonal naive uses one week. No strong statement about training speed, energy, cost, or equal-budget efficiency follows. Recorded inference times cover only TimesFM prediction calls, excluding loading and preparation.
+Calendar-only TimesFM omits promotions and transaction summaries that gradient boosting receives. The full-input TimesFM workflow receives the same raw input types, but represents them differently. These are comparisons of specified workflows. They are not comparisons at equal training-data volume, fitting budget, parameter count, or total computation. TimesFM has upstream pretraining, the fitted comparator uses a year of labels with recent summary features, and seasonal naive uses one week. No strong statement about training speed, energy, cost, or equal-budget efficiency follows. Recorded inference times cover only TimesFM prediction calls, excluding loading and preparation.
 
 ARIMA, ETS, and other foundation models were not evaluated. Their absence limits broad claims about traditional forecasting or the best available model.
 
@@ -74,7 +74,7 @@ Fill rate is total served quantity divided by total recorded demand-proxy quanti
 
 ## Audit trail and provenance
 
-`src/audit_results.py` recomputes the scored summaries and inventory replay from saved forecasts and checks them against published result files. Six integrity tests cover future-sales/traffic perturbations, causal history filling, calibration separation, unique nonnegative predictions and ordered quantiles, buffer independence from test labels and marginal quantiles, and daily stock balance.
+`src/audit_results.py` recomputes the scored summaries and inventory replay from saved forecasts and checks them against published result files. `src/review_evidence.py` supplies a separate standard-library check of saved scores, source targets, calibration offsets, stock orders, arrivals and costs without importing the experiment functions. Its scope and remaining limits are in `docs/REVIEW.md`. Six integrity tests cover future-sales/traffic perturbations, causal history filling, calibration separation, unique nonnegative predictions and ordered quantiles, buffer independence from test labels and marginal quantiles, and daily stock balance.
 
 The implementation and editorial drafting were developed with an AI coding assistant. Model predictions were produced by executing the official checkpoint, rather than invented as example values. The code, saved outputs, package versions, and checks are provided for independent review. Passing these tests does not validate every design assumption or prove all implementation details correct.
 

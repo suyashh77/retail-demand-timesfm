@@ -1,8 +1,12 @@
 # Testing TimesFM 3.0 on grocery sales
 
+[Read the study on my website](https://suyashh77.github.io/suyashsapre_portfolio/timesfm-retail/) · [Explore the saved forecasts](https://suyashh77.github.io/suyashsapre_portfolio/timesfm-retail/forecasts.html) · [Evidence review](docs/REVIEW.md)
+
 ## Situation: I wanted to test the model's promise on a real problem
 
 Google describes TimesFM as a model that can forecast a sequence of numbers using patterns learned from many other sequences. Give it daily sales, for example, and it predicts the sales that come next. The original TimesFM research appeared at ICML in 2024. This project uses the later TimesFM 3.0 release, which also accepts related sales histories and extra information about the past or future. [1, 2]
+
+A language model learns by predicting tokens, which are pieces of text. TimesFM learns patterns in numerical sequences. Google reports that version 3.0 was trained on over a trillion real and synthetic time points. It groups observations into patches of 32 time points and uses them to predict future values. Version 3.0 can forecast a horizon in one pass, using related series and known future inputs. The comparison with a language model explains learning patterns across tasks; it does not imply human reasoning or reliable forecasts on every new dataset. [2]
 
 The attraction is practical. A retailer can try an already trained model without first training a new forecasting model for that retailer's data. Google calls this **zero-shot forecasting**. The model still needs useful input data, and its forecasts still need to be checked.
 
@@ -22,7 +26,7 @@ This project tests two alternatives: the weekly-repeat rule and gradient boostin
 
 The main difference in this comparison is how the models obtain their patterns. The gradient boosting model learns from this retail dataset. TimesFM arrives with patterns learned during Google's earlier training. In this project, its model weights remain unchanged.
 
-## Action: use real sales, hide the answers, and compare the predictions
+## Analysis: use real sales, hide the answers, and compare the predictions
 
 ### The data
 
@@ -43,6 +47,8 @@ The weekly-repeat method copies the latest seven observed days into the next two
 Gradient boosting is fitted separately for each product group at every forecast start. It uses earlier labeled examples from the preceding year. Its inputs describe recent sales, patterns over the last four weeks, historical transactions, calendar information, and the assumed-known promotions. Its settings are fixed throughout this experiment. [5]
 
 TimesFM receives the latest 256 days of sales and predicts the next 14 days. I tested four versions of its inputs. One forecasts each group separately. Another forecasts the four groups together. The third adds calendar information. The fourth also adds promotion counts and historical transactions. "Together" means the model can consider the other groups' histories while predicting each group. It still produces a separate forecast for each one.
+
+Gradient boosting receives promotions and transaction summaries absent from calendar-only TimesFM. These workflows also differ in history length and feature representation. Their overall comparison cannot isolate the forecasting architecture. The full-input TimesFM configuration receives the same raw input types as gradient boosting, with a different representation.
 
 TimesFM also returns a range of possible outcomes for each future day. In the charts, the shaded band runs from its estimated 10th percentile to its estimated 90th percentile. That is intended to contain the middle 80% of outcomes for that day. It is not a promise that every observation will fall inside it.
 
@@ -88,7 +94,7 @@ TimesFM did better on beverages and bread/bakery. Gradient boosting did better o
 
 There were large individual misses. In the forecast made on August 2, calendar-aware TimesFM predicted about 2,120 beverage sales units for August 11. The recorded value was 1,006. Its estimated middle-80% range was about 1,595 to 2,601, so the observation fell below that range. This is a documented failure case. This analysis does not identify its cause.
 
-Across all test forecasts, that model's middle-80% band contained about 87.8% of recorded observations. The range was somewhat conservative on this sample. Coverage needs to be considered alongside the width of the range and the probability-forecast scores saved in the results.
+Across all test forecasts, that model's middle-80% band contained 87.8% of recorded observations, compared with 86.2% for gradient boosting. Both covered more outcomes than their stated 80%. Coverage alone cannot establish which uncertainty estimate is better. Calendar TimesFM's average range was narrower, 573.67 versus 615.68 source quantity units. Mean pinball loss across the nine predicted quantiles was 56.78 versus 56.67, with lower better. This score penalizes errors in the predicted quantiles. The results give no clear overall uncertainty winner, and pooled scores reflect the groups' different scales. Requesting prediction intervals does not itself improve the point forecast.
 
 ### Inventory results answered a different question
 
@@ -108,7 +114,7 @@ On this store and test period, pretrained TimesFM 3.0 produced forecasts close t
 
 That is evidence for testing the model as a forecasting candidate. It does not establish superiority across retail, a causal effect of calendar or promotions, or readiness for production. The public dataset could overlap the model's earlier training data, whose full history cannot be independently audited here. "Zero-shot" describes the absence of task-specific fitting in this project.
 
-I would next repeat the comparison on other stores and a new, untouched time period, add seasonal statistical models, and use timestamped promotion plans. For inventory, the next study should check the extra-stock calculation over a longer history and include the constraints of a particular retailer.
+I would first match the raw input sets and document the different history budgets, then add promotions and historical transactions separately. Repeating across stores and untouched periods would test whether the product-group differences persist. I would also add seasonal statistical models and use timestamped promotion plans. For inventory, the next study should compare extra-stock methods directly under the same ordering rule, use a longer calibration history and include realistic retailer constraints. That would test whether better uncertainty estimates improve decisions about shortages and stock held.
 
 ## Sources and reproducibility
 
@@ -127,13 +133,15 @@ The downloadable TimesFM 3.0 weights have a non-commercial, non-production licen
 
 ## Read or reproduce the project
 
-Open `portfolio_report.html` for the plain-language dashboard. It works offline and explores saved forecasts. The full explanation above follows Situation, Task, Action, and Result. The short interview answer and LinkedIn draft are in `docs/`.
+Open `portfolio_report.html` for the plain-language dashboard. It works offline and explores saved forecasts. The full explanation above follows Situation, Task, Analysis, and Result. The short interview answer and LinkedIn draft are in `docs/`.
 
 ### Files to start with
 
 | File | What it explains |
 | --- | --- |
 | `docs/PROJECT_STORY.md` | The full project in plain language |
+| `docs/REVIEW.md` | What was checked and which claims remain limited |
+| `src/review_evidence.py` | A separate arithmetic check of the saved evidence |
 | `docs/METHODS.md` | Exact methods, assumptions, and limits of the claims |
 | `docs/INTERVIEW_ANSWER.md` | A short STAR answer |
 | `docs/LINKEDIN_POST.md` | A short post inviting feedback |
@@ -156,6 +164,7 @@ python src/download_assets.py
 python src/prepare_data.py --raw-dir raw
 python src/experiment.py --checkpoint checkpoints/timesfm3 --fresh
 python src/audit_results.py
+python src/review_evidence.py
 python src/build_report.py
 python src/build_notebook.py
 python -m unittest discover -s tests -v
@@ -172,6 +181,7 @@ python -m pip install -r requirements-analysis.txt
 python src/download_assets.py --skip-model
 python src/prepare_data.py --raw-dir raw
 python src/audit_results.py
+python src/review_evidence.py
 python -m unittest discover -s tests -v
 ```
 
@@ -186,3 +196,5 @@ Six integrity tests passed on the recorded project. The report script was checke
 The data preparation, saved-result recomputation, six integrity tests, and report-control checks also passed from a fresh GitHub checkout using the pinned source data. That check did not rerun the large model, whose original inference outputs are saved in the repository.
 
 This is an AI-assisted research implementation. Saved predictions came from executing the official TimesFM checkpoint. Scores and the inventory replay were recomputed from those outputs. The repository supports review and reproduction, while the single-store design and data-availability assumptions limit the conclusions.
+
+The additional standard-library arithmetic review checks 8,064 forecast rows and 2,016 inventory rows without importing the experiment functions. See `docs/REVIEW.md` and `results/review_audit.json` for its scope and limits.

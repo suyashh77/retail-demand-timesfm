@@ -1,17 +1,25 @@
-Grocery stores place orders before they know how much customers will buy. I wanted to test whether Google's TimesFM 3.0 could help with that problem using its existing training, without fitting the model specifically to the store.
+I heard about Google's TimesFM 3.0 and wanted to examine the idea of a "ChatGPT moment" for time-series forecasting: could a model trained on many sequences forecast a new task without being trained specifically for it?
 
-The question was whether it could compete with familiar forecasting approaches and provide useful estimates of uncertainty.
+Language models learn by predicting tokens, pieces of text. TimesFM learns patterns in numerical sequences. Google reports training it on over a trillion real and synthetic time points. It groups observations into patches and predicts future values from history. Version 3.0 can forecast the horizon in one pass, using related series and known future inputs. [Google explains the approach here](https://research.google/blog/timesfm-3-a-zero-shot-foundation-model-for-multivariate-forecasting/).
 
-I used four product groups from Favorita store 1 in Quito, Ecuador. Each TimesFM forecast used 256 days of history to predict fourteen days, repeated at twelve weekly starting dates. I compared several input configurations with a forecast that repeats last week and gradient boosting fitted to earlier sales.
+I wanted to test its accuracy and uncertainty estimates on grocery sales, where forecasts inform stock orders.
 
-TimesFM with calendar information had 9.68% total forecast error, compared with 12.56% for the weekly rule and 9.69% for gradient boosting. Their overall scores were very close. Adding promotions and historical transactions did not improve the calendar configuration.
+**Analysis:** I used four product groups at one Favorita store in Quito, Ecuador. Each TimesFM forecast used 256 days of history to predict fourteen days, tested at twelve weekly starts.
 
-I also checked prediction intervals, the model's estimated ranges for future sales. Its middle-80% range contained 87.8% of recorded observations, compared with 86.2% for gradient boosting. Both covered more observations than their stated 80%. These coverage figures alone do not establish which model gives better uncertainty estimates.
+I compared separate and joint forecasts, then added calendar inputs: weekday, time of year, holidays and payday indicators. Another configuration added promotions and past transactions. Baselines repeated last week or used gradient boosting fitted to earlier sales. TimesFM's weights stayed unchanged.
 
-The study covers one store and period. Future promotions were assumed planned because dated plans were unavailable, and overlap with the model's earlier training data cannot be ruled out.
+**Results:** Calendar-aware TimesFM scored 9.68% WAPE, versus 12.56% for the weekly rule and 9.69% for gradient boosting. WAPE is total absolute error divided by total recorded sales. The overall scores were very close.
 
-[Model documentation and official code](https://github.com/google-research/timesfm)
+TimesFM did better on beverages and bread/bakery. Gradient boosting did better on dairy and grocery I. Adding promotions and past transactions together raised TimesFM's error to 9.99%. More inputs did not help here.
 
-[Project code, methods, and saved results](https://github.com/suyashh77/retail-demand-timesfm)
+TimesFM's estimated middle-80% range covered 87.8% of observations, versus 86.2% for gradient boosting. Wider ranges can cover more outcomes, so coverage alone cannot establish better uncertainty estimates.
 
-How would you evaluate whether these prediction intervals are reliable enough to inform extra stock across stores?
+**Takeaway and next study:** TimesFM came close to a fitted baseline without task-specific training. But gradient boosting received inputs absent from calendar-only TimesFM, and product-level results varied.
+
+I would match input sets, add promotions and transactions separately, then repeat across stores and untouched periods before comparing shortages and stock held. This is a single-store historical study with overlapping forecast windows. Future promotions were assumed known, and pretraining overlap cannot be ruled out.
+
+[Full study and interactive forecasts](https://suyashh77.github.io/suyashsapre_portfolio/timesfm-retail/)
+
+[Code, methods, saved results and limitations](https://github.com/suyashh77/retail-demand-timesfm)
+
+Would the product-level differences persist when both models receive the same inputs?

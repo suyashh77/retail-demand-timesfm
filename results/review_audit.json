@@ -1,0 +1,74 @@
+{
+  "status": "passed",
+  "forecast_rows_checked": 8064,
+  "test_rows_per_model": 672,
+  "inventory_rows_checked": 2016,
+  "checks": [
+    "Target dates and actual values match prepared source data",
+    "Seasonal baseline uses only the previous observed week",
+    "WAPE, MAE, bias, coverage, width and nine-quantile pinball match saved overall scores",
+    "Family WAPE matches saved family scores",
+    "Baseline quantiles use only calibration residuals",
+    "Aggregate buffers use only twelve calibration windows",
+    "Orders, seven-day arrivals, served quantity, stock balances and default costs match",
+    "Inventory totals and fill rates match"
+  ],
+  "forecast_metrics": {
+    "Seasonal naive": {
+      "n": 672,
+      "wape": 0.12555480063511343,
+      "mae": 182.0348674702381,
+      "bias": 0.012731416369190614,
+      "coverage80": 0.9226190476190477,
+      "pinball": 77.55811140707672,
+      "mean_interval_width": 856.9247250000001
+    },
+    "Gradient boosting": {
+      "n": 672,
+      "wape": 0.09685056343083188,
+      "mae": 140.4182029629125,
+      "bias": -0.013472743203018228,
+      "coverage80": 0.8616071428571429,
+      "pinball": 56.67214236847814,
+      "mean_interval_width": 615.681621647814
+    },
+    "TimesFM univariate": {
+      "n": 672,
+      "wape": 0.10197167235212469,
+      "mae": 147.84301172428675,
+      "bias": 0.017194031151839564,
+      "coverage80": 0.8913690476190477,
+      "pinball": 60.65535182848289,
+      "mean_interval_width": 579.2638820466541
+    },
+    "TimesFM multivariate": {
+      "n": 672,
+      "wape": 0.10158652825807826,
+      "mae": 147.2846128915696,
+      "bias": 0.020100829458605862,
+      "coverage80": 0.8869047619047619,
+      "pinball": 60.10247950458708,
+      "mean_interval_width": 571.7024959155491
+    },
+    "TimesFM + calendar": {
+      "n": 672,
+      "wape": 0.09675332876085334,
+      "mae": 140.27722786539712,
+      "bias": 0.0190861043906076,
+      "coverage80": 0.8779761904761905,
+      "pinball": 56.78254876866093,
+      "mean_interval_width": 573.665923232124
+    },
+    "TimesFM + all inputs": {
+      "n": 672,
+      "wape": 0.0999278117717882,
+      "mae": 144.8797328374009,
+      "bias": 0.011153441556100409,
+      "coverage80": 0.8511904761904762,
+      "pinball": 58.98163766057978,
+      "mean_interval_width": 535.9937500045413
+    }
+  },
+  "implementation": "Python standard library; does not import experiment.py or audit_results.py",
+  "limits": "Checks saved artifacts. Does not establish pretraining independence, statistical superiority, real-time promotion availability, or production suitability."
+}
