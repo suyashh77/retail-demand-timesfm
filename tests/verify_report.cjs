@@ -19,8 +19,17 @@ function element(id){
 }
 const context=vm.createContext({document:{getElementById:element},window:{addEventListener(){}},console});
 vm.runInContext(script,context);
-assert.equal((element('metrics').innerHTML.match(/<tr/g)||[]).length,6);
+assert.equal((element('metrics').innerHTML.match(/<tr/g)||[]).length,json.models.length);
 assert.equal((element('family-metrics').innerHTML.match(/<tr/g)||[]).length,4);
+if(json.comparisonBoosting){
+ const matchedBoosting=json.metrics.find(r=>r.model===json.comparisonBoosting);
+ assert(content.includes(`<strong>${(100*matchedBoosting.wape).toFixed(2)}%</strong>`),'Headline does not match current boosting results');
+ assert(!content.includes('Almost tied with TimesFM'),'Stale initial-comparison conclusion');
+ for(const family of json.families){
+  const score=json.byFamily.find(r=>r.family===family&&r.model===json.comparisonBoosting);
+  assert(element('family-metrics').innerHTML.includes((100*score.wape).toFixed(2)+'%'),'Family table uses another baseline');
+ }
+}
 for(const family of json.families)for(const model of json.models)for(const origin of json.origins){
  element('family').value=family;element('model').value=model;element('origin').value=origin;
  element('family').events.change();
@@ -36,5 +45,5 @@ element('holding').value='0.05';element('holding').events.input();
 assert(element('inventory').innerHTML.startsWith('<tr class="best"><td>TimesFM: groups together + calendar'));
 element('holding').value='0.01';element('shortage').value='1';element('shortage').events.input();
 assert(element('inventory').innerHTML.startsWith('<tr class="best"><td>TimesFM: groups together</td>'));
-assert.equal((element('inventory').innerHTML.match(/<tr/g)||[]).length,6);
-console.log(JSON.stringify({reportDataBytes:JSON.stringify(json).length,forecastRows:json.forecasts.length,filterCombinationsChecked:288,sliderRankingChecks:2,scriptRuntime:'passed',browserRendering:'unavailable: in-app browser cannot reach local host'}));
+assert.equal((element('inventory').innerHTML.match(/<tr/g)||[]).length,json.models.length);
+console.log(JSON.stringify({reportDataBytes:JSON.stringify(json).length,forecastRows:json.forecasts.length,filterCombinationsChecked:json.families.length*json.models.length*json.origins.length,sliderRankingChecks:2,scriptRuntime:'passed',browserRendering:'unavailable: in-app browser cannot reach local host'}));

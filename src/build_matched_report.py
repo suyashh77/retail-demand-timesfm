@@ -81,7 +81,7 @@ def build():
         sensitivity = (f'With the corrected calendar boosting representation kept fixed, extending its local window from 256 to 365 days '
                        f'changed WAPE from {100*cal.boosting_wape:.2f}% to {100*longer.wape:.2f}%. '
                        'The latter has more local history than the TimesFM context and is a separate sensitivity check. '
-                       'The original 9.69% boosting score used a different, own-group feature representation, a year of labels and extra covariates. '
+                       'The original boosting workflow used a different, own-group feature representation, a year of labels and extra covariates. '
                        'Changes from that old score cannot be attributed solely to removing covariates. '
                        'See results/matched_inputs/history_sensitivity/ for the forecasts and declared settings.')
     inventory_text = (f'Under the same illustrative weekly-order rule, calendar TimesFM filled {100*ti.fill_rate:.2f}% '
@@ -169,12 +169,44 @@ The correction needs the analysis dependencies and the saved original forecasts.
 The next validation should use new stores or a later untouched period, consider stronger or tuned baselines under a declared budget, and test promotions and transactions separately. Matching inputs here improves the comparison; it does not establish a general retail winner.
 '''
     (ROOT / 'docs/MATCHED_COMPARISON.md').write_text(doc, encoding='utf-8')
+    (ROOT / 'docs/METHODS.md').write_text(doc.replace('# Matched-input correction', '# Current matched-input methods and results', 1), encoding='utf-8')
+    audit = json.loads((OUT / 'review_audit.json').read_text())
+    review = f"""# Current matched-input evidence review
+
+## Situation
+
+The initial comparison used unequal inputs. Current results use three pairs with matching raw input types, four sales histories and a 256-day local history window. The original narrative reviews are retained under `docs/archive/`.
+
+## Task
+
+Check the corrected forecast scores and inventory replay against the saved observations and predictions, and make the current results consistent across documentation and reports.
+
+## Analysis
+
+The separate standard-library arithmetic checker verifies {audit['forecast_rows_checked']:,} forecast rows and {audit['inventory_rows_checked']:,} inventory rows without importing the experiment's scoring functions. It checks source targets, calibration offsets, aggregate buffers, orders, deliveries and costs. Ten integrity tests pass, including excluded-input and history-boundary checks. These checks support the recorded computations, rather than every research assumption.
+
+## Result
+
+{result_sentence}
+
+{markdown_table(headline)}
+
+Calendar-pair middle-80% coverage is {100*cal.timesfm_coverage80:.1f}% for TimesFM and {100*cal.boosting_coverage80:.1f}% for boosting. Pinball loss is {cal.timesfm_pinball:.2f} versus {cal.boosting_pinball:.2f}. TimesFM's average range is slightly wider. With full inputs, boosting has lower WAPE on beverages, bread/bakery and dairy; TimesFM has lower WAPE on grocery I and lower pooled WAPE.
+
+{sensitivity}
+
+{limitation}
+
+See [current methods](MATCHED_COMPARISON.md) and [saved audit](../results/matched_inputs/review_audit.json). The archived initial review is [here](archive/INITIAL_REVIEW.md).
+"""
+    (ROOT / 'docs/REVIEW.md').write_text(review, encoding='utf-8')
+
     table = lambda f: '<div class="table-wrap">' + f.to_html(index=False, border=0, escape=True) + '</div>'
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TimesFM grocery forecasting: matched-input comparison</title>
 <meta name="description" content="A corrected comparison of TimesFM 3.0 and gradient boosting using the same local sales histories and input types.">
 <style>:root{{--ink:#203330;--muted:#52635e;--line:#dce3dd;--green:#14745c}}*{{box-sizing:border-box}}body{{margin:0;background:#f6f7f4;color:var(--ink);font:17px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}}header,main,footer{{max-width:1000px;margin:auto;padding:28px 28px}}nav{{display:flex;gap:12px 26px;flex-wrap:wrap;font-size:14px}}a{{color:var(--green);text-underline-offset:3px}}h1{{font-size:clamp(32px,5vw,48px);line-height:1.15;letter-spacing:-.03em;max-width:830px;margin:34px 0 24px}}h2{{font-size:26px;line-height:1.25}}h3{{font-size:20px}}p{{max-width:850px}}section{{border-top:1px solid var(--line);padding:26px 0}}.summary{{background:#e5f0e8;padding:20px 24px;border-radius:6px}}.table-wrap{{overflow-x:auto;margin:22px 0}}table{{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}}th,td{{text-align:right;padding:13px 11px;border-bottom:1px solid var(--line);vertical-align:top}}th:first-child,td:first-child{{text-align:left}}th{{border-bottom-color:var(--ink)}}.note{{font-size:14px;color:var(--muted)}}.label{{font-size:12px;letter-spacing:.09em;color:var(--green);font-weight:650}}footer{{border-top:1px solid var(--line);font-size:14px}}@media(max-width:600px){{header,main,footer{{padding:22px 18px}}table{{font-size:13px}}th,td{{padding:10px 8px}}}}</style></head><body>
-<header><nav><a href="https://suyashh77.github.io/suyashsapre_portfolio/">Portfolio</a><a href="{REPO}">Code and saved results</a><a href="{BLOB}docs/MATCHED_COMPARISON.md">Exact comparison methods</a></nav>
+<header><nav><a href="https://suyashh77.github.io/suyashsapre_portfolio/">Portfolio</a><a href="report.html">Explore the matched forecasts</a><a href="{REPO}">Code and saved results</a><a href="{BLOB}docs/MATCHED_COMPARISON.md">Exact comparison methods</a></nav>
 <h1>TimesFM and gradient boosting, given the same local inputs</h1>
 <p class="summary"><strong>Corrected comparison:</strong> {result_sentence}</p>
 <p class="note">Historical experiment · Favorita store 1, Quito · Four product groups · 14-day forecasts · Correction on previously examined test dates</p></header>

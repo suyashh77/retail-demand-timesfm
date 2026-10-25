@@ -58,7 +58,7 @@ With full inputs, boosting has lower WAPE on beverages, bread/bakery and dairy, 
 
 ### History sensitivity
 
-With the corrected calendar boosting representation kept fixed, extending its local window from 256 to 365 days changed WAPE from 12.30% to 10.82%. The latter has more local history than the TimesFM context and is a separate sensitivity check. The original 9.69% boosting score used a different, own-group feature representation, a year of labels and extra covariates. Changes from that old score cannot be attributed solely to removing covariates. See results/matched_inputs/history_sensitivity/ for the forecasts and declared settings.
+With the corrected calendar boosting representation kept fixed, extending its local window from 256 to 365 days changed WAPE from 12.30% to 10.82%. The latter has more local history than the TimesFM context and is a separate sensitivity check. The original boosting workflow used a different, own-group feature representation, a year of labels and extra covariates. Changes from that old score cannot be attributed solely to removing covariates. See results/matched_inputs/history_sensitivity/ for the forecasts and declared settings.
 
 ### Prediction intervals
 

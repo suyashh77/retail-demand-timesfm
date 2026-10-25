@@ -1,96 +1,95 @@
-# Initial experiment: methods and claim boundaries
+# Current matched-input methods and results
 
-The current matched-input correction is documented in [MATCHED_COMPARISON.md](MATCHED_COMPARISON.md). The methods below describe the original unequal-input exploration, whose outputs are preserved.
+## Situation
 
-This is an exploratory, retrospective case study. It is not a randomized study, a registered benchmark, a test of all retail forecasting methods, or evidence of actual financial savings.
+The initial headline compared calendar-only TimesFM with gradient boosting that also received promotions and transactions. The workflows also differed in local history and related-series access. That comparison could not isolate differences between forecasting methods.
 
-## What was run
+## Task
 
-One fixed store and four fixed product families were evaluated with six fixed configurations. No TimesFM fine-tuning or per-task optimization was performed. The primary metric and input configurations were encoded before the saved inference run. There was no formal preregistration. Test-set rankings are reported retrospectively, and a separate second holdout has not validated selection of a winning configuration.
+Compare three pairs with matching raw input types, product-group access, local history windows, forecast dates and horizon. Preserve the initial outputs as a separate exploratory stage.
 
-| Element | Recorded setup |
-| --- | --- |
-| Store | Favorita store 1, Quito, Ecuador |
-| Families | BEVERAGES, BREAD/BAKERY, DAIRY, GROCERY I |
-| Prepared dates | 2015-01-01 through 2017-08-15 |
-| Source observations | 3,824 nonmissing family/day sales values |
-| Explicitly missing rows | Eight Christmas family/day rows, retained as missing in the export |
-| TimesFM context | 256 daily observations per target |
-| Forecast horizon | 14 days |
-| Calibration starts | Twelve, weekly, 2017-02-15 through 2017-05-03 |
-| Last calibration label | 2017-05-16 |
-| Test starts | Twelve, weekly, 2017-05-17 through 2017-08-02 |
-| Last scored target | 2017-08-15 |
-| Primary scored combinations | 672 per configuration, with overlapping dates |
-| Secondary scored combinations | 336 per configuration, using only forecast days 1 through 7 |
-| TimesFM checkpoint | Official `google/timesfm-3.0-pytorch` |
-| Runtime | Python 3.12.10, PyTorch 2.11.0+cpu, eight CPU threads, seed 42 |
+## Analysis
 
-Exact source-code and model revisions and SHA-256 checksums are in `data/source_manifest.json`. The code commit is `e51928e27119cb17bebc005be2696b75e0a9e688`. The model revision is `43046b85ec22d584a13f8098c2ed39c889e129c2`.
+Both workflows have access to the same four product groups and the same latest 256 daily observations. They predict the same fourteen days at the same twelve weekly test starts. The sales-only pair excludes calendar, promotions and transactions. The calendar pair adds only calendar signals. The full-input pair adds the four promotion series and historical store transactions to both workflows. Future realized transactions and sales are excluded.
 
-## Target and information available to the model
+TimesFM uses the saved official checkpoint forecasts, whose inputs have not changed. Its weights remain unchanged. Each gradient boosting model is fitted separately per target and forecast start, using supervised examples drawn entirely from that 256-day window. Each example includes sales summaries for all four groups, a horizon indicator and only the allowed covariates. The 28-day feature warm-up is inside the shared window, leaving fewer labeled training days than 256. Matching available local data does not equate the feature representation, external pretraining, model capacity or fitting procedure.
 
-The target is recorded family-level sales quantity. It is not revenue, SKU-level count, recovered lost demand, or a direct measurement of all customer demand. Fractions are possible. Differences in units across families limit the economic interpretation of pooled quantity metrics.
+Gradient boosting uses `max_iter=80`, `max_leaf_nodes=15`, `learning_rate=0.07`, `l2_regularization=10`, `random_state=42`, and `early_stopping=False`. Historical training origins begin after the in-window 28-day warm-up. Labels end before the current forecast start. Missing Christmas labels are excluded; context filling follows the original causal procedure.
 
-At a forecast start, target and transaction histories end on the preceding day. Weekday, annual position, applicable holidays, and payday indicators extend into the horizon. Historical promotion counts also extend into the horizon under an explicit planned-input assumption. No timestamped plan archive exists in the source. This limits any claim of a fully point-in-time realistic promotion experiment.
+Calendar features describe weekday, annual position, applicable holidays and payday indicators. Promotions remain an assumed-known scenario because dated plan versions are unavailable. The full-input comparison changes promotions and transactions together and cannot isolate them.
 
-There are no product prices. Traffic is proxied by transaction counts, which count purchases rather than visitors. Future realized transactions are excluded. Missing sales and promotion history are filled from the previous same weekday, sequentially. Traffic is forward-filled. Missing evaluation targets would raise an error instead of being silently filled.
+This correction was designed after the original results had been examined. It reuses the same historical test period and does not provide a new untouched validation. There is one store, overlapping forecast windows, assumed-known promotions and possible pretraining overlap. No significance or statistical equivalence claim is made. The fixed boosting settings were inherited from the original run, without a new parameter search.
 
-The holiday feature includes national holidays and regional/local holidays applicable to Pichincha/Quito. Transferred original dates are excluded, and scheduled Transfer dates are included. Unscheduled Event rows, such as earthquake-related events, are excluded. Calendar publication timestamps were not independently audited either.
+The declared settings were saved in `results/matched_inputs/protocol.json` before the new fits. This file is a run record, not a formal preregistration. The original forecast file and prepared panel are identified by SHA-256 checksums. The matched run adds 288 gradient boosting fits: three configurations, 24 calibration/test starts and four targets. Previously computed TimesFM outputs are reused exactly.
 
-## Comparators and unequal information histories
+## Result
 
-Seasonal naive repeats the last seven days twice. Its point forecasts have no fitted parameters.
+With sales and calendar inputs, TimesFM scored 9.68% WAPE and gradient boosting scored 12.30%. This replaces the earlier headline comparison with unequal inputs.
 
-Gradient boosting uses one `HistGradientBoostingRegressor` per family, refitted at each start. It predicts all fourteen horizons using direct supervised examples with horizon as an input. Its labeled targets come from the preceding 365 days and are strictly earlier than the current start. Features use recent 28-day sales summaries, aligned weekday values, historical transaction summaries, calendar, and assumed-known promotions. Settings are `max_iter=80`, `max_leaf_nodes=15`, `learning_rate=0.07`, `l2_regularization=10`, and `random_state=42`. Other settings follow scikit-learn 1.8.0 defaults. With fewer than 10,000 training examples, default automatic early stopping is inactive.
+WAPE is total absolute forecast error divided by total recorded sales. Lower is better. Each method has 672 scored group/start/horizon combinations.
 
-TimesFM configurations are independent single-target forecasts, four-target forecasts, four-target forecasts plus calendar, and four-target forecasts plus calendar/promotions/past transactions. The last configuration changes promotions and past transactions together. It does not isolate their effects. All configurations use official evaluator options: `use_symmetric_averaging=False`, `make_positive=True`, `sort_quantiles=True`, `use_znorm=False`, and `padding_mode="none"`. Native targets are nonnegative. The point forecast is the sorted median quantile.
+| Inputs available to both models | TimesFM WAPE | Gradient boosting WAPE |
+| --- | --- | --- |
+| Sales histories only | 10.16% | 11.98% |
+| Sales + calendar | 9.68% | 12.30% |
+| Sales + calendar + promotions + past transactions | 9.99% | 11.14% |
 
-Calendar-only TimesFM omits promotions and transaction summaries that gradient boosting receives. The full-input TimesFM workflow receives the same raw input types, but represents them differently. These are comparisons of specified workflows. They are not comparisons at equal training-data volume, fitting budget, parameter count, or total computation. TimesFM has upstream pretraining, the fitted comparator uses a year of labels with recent summary features, and seasonal naive uses one week. No strong statement about training speed, energy, cost, or equal-budget efficiency follows. Recorded inference times cover only TimesFM prediction calls, excluding loading and preparation.
+### Product groups in the calendar pair
 
-ARIMA, ETS, and other foundation models were not evaluated. Their absence limits broad claims about traditional forecasting or the best available model.
+| Product group, calendar pair | TimesFM WAPE | Gradient boosting WAPE |
+| --- | --- | --- |
+| BEVERAGES | 8.53% | 9.43% |
+| BREAD/BAKERY | 9.74% | 10.04% |
+| DAIRY | 9.26% | 9.05% |
+| GROCERY I | 10.74% | 15.89% |
 
-## Scores and dependence
+The original product-group ranking against the earlier boosting baseline should not be carried over to this corrected comparison. The table above is the relevant comparison when both workflows receive sales and calendar inputs.
 
-For saved test predictions, WAPE is `sum(abs(actual - prediction)) / sum(actual)`. Errors are calculated separately for every family, start, and horizon before aggregation. This weights high-volume groups more heavily and counts overlapping target dates at different forecast distances. Beverages and grocery I contribute approximately 82.2% of the total scored quantity. `metrics_by_family.csv` exposes the family differences.
+### Product groups with all inputs
 
-The secondary first-week score omits horizons 8 through 14. It avoids repeating target dates across starts but does not make adjacent sales observations independent. `metrics_by_forecast_start.csv` and `paired_comparison_by_start.csv` expose differences over time. No p-values, population confidence intervals, significance claims, or statistical equivalence claims are reported. Twelve starts and one store provide limited evidence about broader performance.
+| Product group, full-input pair | TimesFM WAPE | Gradient boosting WAPE |
+| --- | --- | --- |
+| BEVERAGES | 8.59% | 8.41% |
+| BREAD/BAKERY | 10.31% | 9.34% |
+| DAIRY | 9.90% | 8.74% |
+| GROCERY I | 11.16% | 14.32% |
 
-Macro MASE averages family-level MAE divided by each family's mean absolute seasonal lag-7 difference in pre-test observations. The scale excludes missing source values. Coverage is the proportion of targets within the 10th-to-90th percentile band, including endpoints. Average pinball loss is computed over all nine quantiles and saved rows. Interval width and pinball loss are in source quantity units, so they also reflect family scale.
+With full inputs, boosting has lower WAPE on beverages, bread/bakery and dairy, while TimesFM has lower WAPE on grocery I. TimesFM still has lower pooled WAPE. Grocery I contributes about 44.6% of the scored quantity. This shows why the pooled ranking should be read alongside product-group results.
 
-TimesFM intervals are native outputs after the official sorting and nonnegative options. Conventional intervals add empirical signed calibration residual quantiles to the fitted point forecast, with negative lower values clamped to zero. Baseline q50 can therefore differ from its original fitted point forecast. Calibration-row baseline intervals are not independently evaluated. Test intervals use only pre-test residuals. The two interval-generation procedures differ and should not be described as equally calibrated methods.
+### History sensitivity
 
-## Inventory replay
+With the corrected calendar boosting representation kept fixed, extending its local window from 256 to 365 days changed WAPE from 12.30% to 10.82%. The latter has more local history than the TimesFM context and is a separate sensitivity check. The original boosting workflow used a different, own-group feature representation, a year of labels and extra covariates. Changes from that old score cannot be attributed solely to removing covariates. See results/matched_inputs/history_sensitivity/ for the forecasts and declared settings.
 
-The replay uses recorded sales as a demand proxy for 84 days, 2017-05-17 through 2017-08-08. Review occurs every seven days and delivery lead time is seven days. On each day, deliveries arrive, any scheduled order is placed, demand is served, and a holding charge applies to ending inventory. Unmet sales are lost, rather than backordered.
+### Prediction intervals
 
-For each model/family, protection-period forecast is the sum of fourteen point forecasts. The buffer is `max(0, quantile(aggregate_signed_error, 0.9, method="higher"))` over twelve earlier calibration starts, where aggregate signed error is the fourteen-day actual total minus the fourteen-day point-forecast total. Buffers stay fixed during testing. Orders are `max(0, forecast_total + buffer - on_hand - outstanding_orders)`.
+| Shared inputs | TimesFM 80% coverage | Boosting 80% coverage | TimesFM quantile loss | Boosting quantile loss |
+| --- | --- | --- | --- | --- |
+| Sales histories only | 88.7% | 87.2% | 60.10 | 70.13 |
+| Sales + calendar | 87.8% | 83.3% | 56.78 | 72.82 |
+| Sales + calendar + promotions + past transactions | 85.1% | 81.5% | 58.98 | 68.24 |
 
-This empirically estimates total-period error. It does not sum daily upper quantiles, infer a joint distribution from marginal quantiles, use native TimesFM probability forecasts to set the buffer, or claim a conformal guarantee. Calibration horizons overlap and the buffer sample is small.
+Coverage measures how often observations fall within the estimated middle-80% range. Higher coverage alone does not establish better uncertainty estimates. Quantile loss is mean pinball loss over all nine predicted quantiles, with lower better. Widths are saved in `paired_comparison.csv`. These pooled quantities also reflect differences in family scale. TimesFM intervals are native; boosting intervals use signed residual quantiles from the earlier calibration period.
 
-All models begin with the same on-hand quantity per family, equal to twice that family's preceding seven days of observed sales. The initial pipeline is empty. No warm-up is discarded. Initial stock can materially affect results and has not been varied in this experiment.
+### Inventory replay
 
-Default cost is `0.01 * total_ending_inventory + 1 * total_unmet_sales`. The values are illustrative cost units. Family quantities differ, so the pooled cost does not estimate actual money. There are no buying charges, order capacity, case-pack restrictions, expiry, or terminal stock/pipeline valuations. At a holding charge of 0.05, the preferred replay changes to the calendar configuration. The default 20.4% reduction is conditional on the specified policy, starting stock, test window, demand proxy, and cost assumptions.
+Under the same illustrative weekly-order rule, calendar TimesFM filled 99.47% of the recorded sales quantity and calendar gradient boosting filled 99.65%. Default replay costs were 24,542 and 27,466 illustrative units respectively. Buffers differ by workflow because each is estimated from that workflow's earlier aggregate errors. This is a model-plus-buffer policy comparison, not measured retailer savings. Native daily prediction intervals do not set these buffers.
 
-Fill rate is total served quantity divided by total recorded demand-proxy quantity. It is distinct from the fraction of days without a shortage and from cycle service level. Simulated lost sales are not measured Favorita lost sales.
+The same initialization, seven-day review and delivery intervals, costs and limitations as the original simulation apply. The matched replay includes all six paired workflows plus the seasonal baseline. It omits capacity, expiry, purchase costs and terminal valuation.
 
-## Audit trail and provenance
+## Reproduce and check
 
-`src/audit_results.py` recomputes the scored summaries and inventory replay from saved forecasts and checks them against published result files. `src/review_evidence.py` supplies a separate standard-library check of saved scores, source targets, calibration offsets, stock orders, arrivals and costs without importing the experiment functions. Its scope and remaining limits are in `docs/REVIEW.md`. Six integrity tests cover future-sales/traffic perturbations, causal history filling, calibration separation, unique nonnegative predictions and ordered quantiles, buffer independence from test labels and marginal quantiles, and daily stock balance.
+After preparing `data/retail_panel.csv` and obtaining the original saved forecasts:
 
-The implementation and editorial drafting were developed with an AI coding assistant. Model predictions were produced by executing the official checkpoint, rather than invented as example values. The code, saved outputs, package versions, and checks are provided for independent review. Passing these tests does not validate every design assumption or prove all implementation details correct.
+```shell
+python src/matched_comparison.py --threads 8
+python src/history_sensitivity.py
+python src/review_evidence.py --matched
+python src/build_matched_report.py
+python -m unittest discover -s tests -v
+```
 
-The original ICML paper concerns the original TimesFM model. This project does not present that paper as peer review of the specific TimesFM 3.0 release or of this experiment. Version-specific capability claims cite the official release documentation.
+The correction needs the analysis dependencies and the saved original forecasts. It does not download or rerun the TimesFM checkpoint. `threadpoolctl` is a scikit-learn dependency.
 
-Public data could overlap upstream pretraining. The model card describes exclusions, but full training lineage was not independently inspected. The only warranted zero-shot claim is that no task-specific TimesFM fitting was performed here.
+`training_audit.csv` records the allowed window, label dates, example count and timing at every fit. `feature_names.json` exposes included channels. Four additional integrity tests check excluded covariates, the shared history boundary, future-target/transaction exclusion, related-series access and calibration offsets. The separate arithmetic checker covers saved scores, source targets, buffers, orders, deliveries and costs.
 
-## Claim boundaries
-
-| Supported by this run | Unsupported extension |
-| --- | --- |
-| Calendar TimesFM scored 9.68% versus seasonal naive's 12.56% | TimesFM beats every traditional method |
-| Gradient boosting scored 9.69% in this setup | The methods are statistically equivalent |
-| The final input bundle scored worse than calendar only | Promotions are useless or harmed sales |
-| Default multivariate replay cost was 20.4% lower than seasonal naive | Favorita saved 20.4%, or a deployable policy is ready |
-| Daily native intervals were evaluated | Those intervals directly generated the inventory improvement |
-| Forecast windows follow time and hide later sales/traffic | Every promotion/calendar input is verified to have been available in real time |
+The next validation should use new stores or a later untouched period, consider stronger or tuned baselines under a declared budget, and test promotions and transactions separately. Matching inputs here improves the comparison; it does not establish a general retail winner.

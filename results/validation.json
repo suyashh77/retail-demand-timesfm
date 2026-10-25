@@ -1,7 +1,7 @@
 {
   "python_integrity_tests": 10,
   "python_integrity_tests_status": "passed",
-  "report_filter_combinations": 288,
+  "report_filter_combinations": 336,
   "report_slider_ranking_checks": 2,
   "report_script_runtime": "passed using a local DOM test harness",
   "static_figures": "overview and held-out forecasts visually inspected",

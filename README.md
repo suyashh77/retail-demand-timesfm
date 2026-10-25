@@ -1,6 +1,8 @@
 # TimesFM 3.0 retail forecasting study
 
-[Live matched comparison](https://suyashh77.github.io/suyashsapre_portfolio/timesfm-retail/) · [Matched methods](docs/MATCHED_COMPARISON.md) · [Initial methods](docs/METHODS.md)
+[Live matched comparison](https://suyashh77.github.io/suyashsapre_portfolio/timesfm-retail/) · [Matched methods](docs/MATCHED_COMPARISON.md) · [Evidence review](docs/REVIEW.md)
+
+> **Current results:** Sales + calendar gives **9.68% WAPE for TimesFM and 12.30% for gradient boosting**. The separate 365-day boosting history check scores **10.82%**. These figures supersede the original unequal-input headline.
 
 ## Situation
 
@@ -32,7 +34,7 @@ TimesFM has lower pooled WAPE in these three shared-256-day comparisons. Product
 
 For the calendar pair, middle-80% interval coverage is 87.8% for TimesFM and 83.3% for boosting. Mean nine-quantile pinball loss is 56.78 versus 72.82, with lower better. TimesFM's average range is slightly wider in this pair, and coverage alone does not establish a better uncertainty estimate. Full width and quantile metrics are saved alongside the paired results.
 
-A separate history check keeps the corrected calendar boosting representation fixed and extends its local window to 365 days. WAPE changes from 12.30% to 10.82%. That longer-history workflow has more local observations than the TimesFM context and is reported separately. The old 9.69% boosting score used a different representation, extra inputs and a year of labels. It is not the matched calendar baseline.
+A separate history check keeps the corrected calendar boosting representation fixed and extends its local window to 365 days. WAPE changes from 12.30% to 10.82%. That longer-history workflow has more local observations than the TimesFM context and is reported separately. The initial workflow used a different representation, extra inputs and a year of labels. Its archived score describes a different comparison.
 
 This is a post-hoc correction on the previously examined test dates, not a new untouched validation. It covers one store; windows overlap; sales can understate demand; future promotions are assumed known; and pretraining overlap cannot be ruled out. No significance, equivalence or general superiority claim is made. Fixed boosting settings were inherited without a new tuning search.
 
@@ -49,10 +51,10 @@ python src/prepare_data.py --raw-dir raw
 python src/experiment.py --checkpoint checkpoints/timesfm3 --fresh
 python src/audit_results.py
 python src/review_evidence.py
-python src/build_report.py
 python src/matched_comparison.py --threads 8
 python src/history_sensitivity.py
 python src/review_evidence.py --matched
+python src/build_report.py
 python src/build_matched_report.py
 python src/build_notebook.py
 python -m unittest discover -s tests -v
@@ -70,10 +72,11 @@ python src/download_assets.py --skip-model
 python src/prepare_data.py --raw-dir raw
 python src/audit_results.py
 python src/review_evidence.py
+python src/review_evidence.py --matched
 python -m unittest discover -s tests -v
 ```
 
-Open `matched_report.html` for the current comparison. `report.html` retains the initial unequal-input exploration. Optional report-control check with Node.js:
+Open `matched_report.html` for the current comparison. `report.html` provides interactive exploration of the current matched forecasts. The initial report is archived in `archive/initial-report.html`. Optional report-control check with Node.js:
 
 ```shell
 node tests/verify_report.cjs report.html
@@ -89,12 +92,14 @@ node tests/verify_report.cjs report.html
 | `docs/METHODS.md` | Exact methods and interpretation limits |
 | `docs/REVIEW.md` | Evidence checks and unresolved research questions |
 | `data/` | Source manifest and dataset description |
-| `results/` | Saved forecasts, scores, calibration buffers, simulation outputs and figures |
+| `results/matched_inputs/` | Current matched forecasts, scores, calibration buffers and simulation outputs |
+| `results/` root files | Preserved initial unequal-input outputs; see `results/README.md` |
 | `project_walkthrough.ipynb` | Executed analysis of saved results |
 | `matched_report.html` | Current matched-input results |
-| `report.html` | Initial unequal-input results |
+| `report.html` | Interactive matched-input forecasts |
+| `archive/initial-report.html` | Archived initial unequal-input report |
 
-Ten integrity tests and 288 original-report control selections pass on the recorded artifacts. A separate standard-library implementation checks 8,064 forecast rows and 2,016 inventory rows without importing the experiment's scoring functions. The matched correction checks another 9,408 forecast rows and 2,352 inventory rows; see [matched review_audit.json](results/matched_inputs/review_audit.json). Browser layout verification was unavailable. These checks validate saved calculations within their stated scope, rather than every research assumption.
+Ten integrity tests and 336 matched-report control selections pass on the recorded artifacts. A separate standard-library implementation checks 8,064 forecast rows and 2,016 inventory rows without importing the experiment's scoring functions. The matched correction checks another 9,408 forecast rows and 2,352 inventory rows; see [matched review_audit.json](results/matched_inputs/review_audit.json). Browser layout verification was unavailable. These checks validate saved calculations within their stated scope, rather than every research assumption.
 
 The implementation was developed with an AI coding assistant. Saved model predictions came from executing the official checkpoint. The notebook executes analysis of those saved outputs; it does not rerun inference.
 
