@@ -24,7 +24,7 @@ The saved arithmetic checks and six integrity tests pass. The headline WAPE valu
 
 Calendar TimesFM's middle-80% interval covers 87.8% of outcomes, compared with 86.2% for gradient boosting. Its average width is 573.67 source quantity units, compared with 615.68. Mean nine-quantile pinball loss, a score penalizing quantile errors, is 56.78 versus 56.67, with lower better. These numbers provide no clear overall uncertainty winner. Pooled widths and losses also reflect the different product-group scales. Requesting prediction intervals does not itself improve a model's point forecasts.
 
-The documentation defines WAPE and identifies the unequal inputs. The long account uses Situation, Task, Analysis and Result. The saved checker output is `results/review_audit.json`.
+The documentation defines WAPE and identifies the unequal inputs. The saved checker output is `results/review_audit.json`.
 
 The main remaining limits are substantive:
 

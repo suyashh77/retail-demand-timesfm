@@ -32,8 +32,7 @@ def build():
         origins=[str(d.date()) for d in TEST_ORIGINS],history=history,forecasts=forecasts)
     template=(ROOT/'src/dashboard_template.html').read_text(encoding='utf-8')
     rendered=template.replace('__DATA__',json.dumps(data,separators=(',',':')).replace('</',r'<\/'))
-    (ROOT/'portfolio_report.html').write_text(rendered,encoding='utf-8')
-    (ROOT/'CASE_STUDY.md').write_text((ROOT/'docs/PROJECT_STORY.md').read_text(encoding='utf-8'),encoding='utf-8')
+    (ROOT/'report.html').write_text(rendered,encoding='utf-8')
     print('Built the plain-language dashboard and refreshed the result figures.')
 
 if __name__=='__main__':build()

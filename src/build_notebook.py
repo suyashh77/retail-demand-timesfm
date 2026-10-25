@@ -24,7 +24,7 @@ def main():
         count+=1
         stream=io.StringIO()
         with contextlib.redirect_stdout(stream):
-            exec(compile(source,f'<portfolio-cell-{count}>','exec'),namespace)
+            exec(compile(source,f'<analysis-cell-{count}>','exec'),namespace)
         outputs=[dict(output_type='stream',name='stdout',text=stream.getvalue().splitlines(keepends=True))] if stream.getvalue() else []
         cells.append(dict(cell_type='code',id=f'cell-{len(cells):03d}',metadata={},execution_count=count,
             source=source.splitlines(keepends=True),outputs=outputs))
@@ -125,7 +125,7 @@ print(sensitivity.sort_values('total_cost').groupby(['holding_rate','shortage_ra
 - The inventory model omits capacity, expiry, buying costs, and terminal valuation. It supplies a reproducible experiment, not a production policy.
 - Downloadable TimesFM 3.0 weights have a non-commercial, non-production license. Original data terms also apply.
 
-For exact sources, settings, full experiment rerun commands, and six integrity tests, see the README and CASE_STUDY.''')
+For exact sources, settings, full experiment rerun commands, and six integrity tests, see README.md and docs/METHODS.md.''')
     notebook=dict(cells=cells,metadata=dict(kernelspec=dict(display_name='Python 3',language='python',name='python3'),
         language_info=dict(name='python',version='3.12.0')),nbformat=4,nbformat_minor=5)
     (ROOT/'project_walkthrough.ipynb').write_text(json.dumps(notebook,indent=1),encoding='utf-8')

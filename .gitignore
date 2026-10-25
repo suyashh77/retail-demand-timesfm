@@ -11,3 +11,16 @@ artifact_manifest.json
 docs/LINKEDIN*
 docs/INTERVIEW_ANSWER.md
 drafts/
+
+# Personal narratives are maintained outside the code repository.
+CASE_STUDY.md
+docs/PROJECT_STORY.md
+portfolio_report.html
+
+# Local configuration and credentials.
+.env
+.env.*
+!.env.example
+.gitconfig
+*.pem
+*.key

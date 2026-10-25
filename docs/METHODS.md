@@ -1,6 +1,6 @@
 # Methods, evidence, and boundaries of the claims
 
-This is an exploratory, retrospective case study. It is not a randomized study, a registered benchmark, a test of all retail forecasting methods, or evidence of actual financial savings. The plain-language account is in `PROJECT_STORY.md`.
+This is an exploratory, retrospective case study. It is not a randomized study, a registered benchmark, a test of all retail forecasting methods, or evidence of actual financial savings.
 
 ## What was run
 
