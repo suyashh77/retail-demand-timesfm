@@ -6,7 +6,7 @@ I used four product groups from Favorita store 1 in Quito, Ecuador. Each TimesFM
 
 TimesFM with calendar information had 9.68% total forecast error, compared with 12.56% for the weekly rule and 9.69% for gradient boosting. Their overall scores were very close. Adding promotions and historical transactions did not improve the calendar configuration.
 
-I also checked prediction intervals, the model's estimated ranges for future sales. Its middle-80% range contained 87.8% of recorded observations. The ranges were conservative on this sample, while the overall quantile-error score was very close to gradient boosting's. This does not establish an advantage in uncertainty forecasting.
+I also checked prediction intervals, the model's estimated ranges for future sales. Its middle-80% range contained 87.8% of recorded observations, compared with 86.2% for gradient boosting. Both covered more observations than their stated 80%. These coverage figures alone do not establish which model gives better uncertainty estimates.
 
 The study covers one store and period. Future promotions were assumed planned because dated plans were unavailable, and overlap with the model's earlier training data cannot be ruled out.
 
