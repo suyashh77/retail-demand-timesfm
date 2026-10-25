@@ -1,0 +1,8 @@
+numpy==2.4.1
+pandas==2.3.3
+scikit-learn==1.8.0
+matplotlib==3.10.8
+torch==2.11.0
+safetensors==0.6.2
+huggingface-hub>=0.28
+timesfm @ git+https://github.com/google-research/timesfm.git@e51928e27119cb17bebc005be2696b75e0a9e688

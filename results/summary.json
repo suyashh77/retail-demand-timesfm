@@ -1,0 +1,12 @@
+{
+  "best_timesfm": "TimesFM + calendar",
+  "best_timesfm_wape": 0.0967533287608533,
+  "seasonal_wape": 0.1255548006351134,
+  "relative_error_reduction": 0.2293936331272809,
+  "best_inventory_model": "TimesFM multivariate",
+  "simulated_cost_reduction": 0.20350084078045982,
+  "best_inventory_fill_rate": 0.997288419509237,
+  "seasonal_fill_rate": 0.9861216471159188,
+  "findings": "Calendar-aware TimesFM achieved 9.68% WAPE, a 22.9% reduction in error versus weekly seasonal naive. Gradient boosting was essentially tied at 9.69%. Adding promotions and historical transactions did not improve the calendar-only model in this test.",
+  "inventory_findings": "TimesFM multivariate had the lowest replay cost: 24,305 illustrative units, 20.4% below seasonal naive. Its fill rate was 99.73% versus 98.61%, with 80.5% fewer unmet sales. This is an operational simulation under stated assumptions, not measured retailer savings."
+}

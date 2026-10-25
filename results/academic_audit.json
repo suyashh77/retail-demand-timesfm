@@ -1,0 +1,25 @@
+{
+  "recomputed_forecast_scores_match": true,
+  "recomputed_inventory_scores_match": true,
+  "calendar_beats_boosting_starts": 7,
+  "total_test_starts": 12,
+  "calendar_minus_boosting_gap_percentage_points_min": -2.743054551833758,
+  "calendar_minus_boosting_gap_percentage_points_max": 4.796143523120857,
+  "sales_share_in_primary_score": {
+    "BEVERAGES": 0.3763151311257257,
+    "BREAD/BAKERY": 0.05923372622955864,
+    "DAIRY": 0.11880794259339424,
+    "GROCERY I": 0.4456432000513214
+  },
+  "example_large_miss": {
+    "model": "TimesFM + calendar",
+    "forecast_start": "2017-08-02",
+    "date": "2017-08-11",
+    "family": "BEVERAGES",
+    "recorded_sales": 1006.0,
+    "forecast": 2119.8388671875,
+    "interval_lower": 1594.721435546875,
+    "interval_upper": 2600.985595703125
+  },
+  "interpretation": "Exploratory single-store comparison. No significance test, independence claim, or statistical equivalence claim."
+}

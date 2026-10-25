@@ -1,0 +1,8 @@
+__pycache__/
+.venv/
+raw/
+checkpoints/
+*.part
+.DS_Store
+data/retail_panel.csv
+artifact_manifest.json
