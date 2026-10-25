@@ -1,13 +1,17 @@
-I wanted to see how Google's TimesFM 3.0 would handle a retail forecasting problem.
+Grocery stores place orders before they know how much customers will buy. I wanted to test whether Google's TimesFM 3.0 could help with that problem using its existing training, without fitting the model specifically to the store.
 
-TimesFM is already trained on other time-series data. It can forecast related sales histories and use inputs such as a known calendar without training a new model for the dataset.
+The question was whether it could compete with familiar forecasting approaches and provide useful estimates of uncertainty.
 
-I tested four product groups at one Favorita grocery store, predicting fourteen days at twelve weekly starting dates. The comparisons were a forecast that repeats last week and gradient boosting fitted to earlier sales.
+I used four product groups from Favorita store 1 in Quito, Ecuador. Each TimesFM forecast used 256 days of history to predict fourteen days, repeated at twelve weekly starting dates. I compared several input configurations with a forecast that repeats last week and gradient boosting fitted to earlier sales.
 
-TimesFM with calendar information had 9.68% total forecast error, versus 12.56% for the weekly rule and 9.69% for gradient boosting. The fitted model was almost tied. TimesFM did better on beverages and bread/bakery, while gradient boosting did better on dairy and grocery I. Adding promotions and past transactions did not improve the calendar version.
+TimesFM with calendar information had 9.68% total forecast error, compared with 12.56% for the weekly rule and 9.69% for gradient boosting. Their overall scores were very close. Adding promotions and historical transactions did not improve the calendar configuration.
 
-An inventory simulation also explored the ordering decisions. Its best TimesFM version had 20.4% lower simulated cost than the weekly rule under the chosen assumptions. These are simulated outcomes, and future promotions were assumed planned because dated plans were unavailable.
+I also checked prediction intervals, the model's estimated ranges for future sales. Its middle-80% range contained 87.8% of recorded observations. The ranges were conservative on this sample, while the overall quantile-error score was very close to gradient boosting's. This does not establish an advantage in uncertainty forecasting.
 
-Code, methods, and saved results: https://github.com/suyashh77/retail-demand-timesfm
+The study covers one store and period. Future promotions were assumed planned because dated plans were unavailable, and overlap with the model's earlier training data cannot be ruled out.
 
-Which additional baseline would you include before extending this comparison across stores?
+[Model documentation and official code](https://github.com/google-research/timesfm)
+
+[Project code, methods, and saved results](https://github.com/suyashh77/retail-demand-timesfm)
+
+How would you evaluate whether these prediction intervals are reliable enough to inform extra stock across stores?
