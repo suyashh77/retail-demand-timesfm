@@ -1,0 +1,15 @@
+{
+  "reason": "Measure the effect of a longer local window in the corrected calendar boosting workflow",
+  "history_days": 365,
+  "unchanged": "Four-group sales summaries, calendar inputs, parameters, dates and scoring",
+  "caveat": "Longer boosting history than TimesFM local context; not a matched-window comparison",
+  "design_timing": "Specified after inspecting the 256-day correction; no parameter tuning",
+  "parameters": {
+    "max_iter": 80,
+    "max_leaf_nodes": 15,
+    "learning_rate": 0.07,
+    "l2_regularization": 10,
+    "random_state": 42,
+    "early_stopping": false
+  }
+}

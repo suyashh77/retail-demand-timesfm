@@ -1,0 +1,83 @@
+{
+  "status": "passed",
+  "forecast_rows_checked": 9408,
+  "test_rows_per_model": 672,
+  "inventory_rows_checked": 2352,
+  "checks": [
+    "Target dates and actual values match prepared source data",
+    "Seasonal baseline uses only the previous observed week",
+    "WAPE, MAE, bias, coverage, width and nine-quantile pinball match saved overall scores",
+    "Family WAPE matches saved family scores",
+    "Baseline quantiles use only calibration residuals",
+    "Aggregate buffers use only twelve calibration windows",
+    "Orders, seven-day arrivals, served quantity, stock balances and default costs match",
+    "Inventory totals and fill rates match"
+  ],
+  "forecast_metrics": {
+    "Seasonal naive": {
+      "n": 672,
+      "wape": 0.12555480063511343,
+      "mae": 182.0348674702381,
+      "bias": 0.012731416369190614,
+      "coverage80": 0.9226190476190477,
+      "pinball": 77.55811140707672,
+      "mean_interval_width": 856.9247250000001
+    },
+    "TimesFM multivariate": {
+      "n": 672,
+      "wape": 0.10158652825807826,
+      "mae": 147.2846128915696,
+      "bias": 0.020100829458605862,
+      "coverage80": 0.8869047619047619,
+      "pinball": 60.10247950458708,
+      "mean_interval_width": 571.7024959155491
+    },
+    "TimesFM + calendar": {
+      "n": 672,
+      "wape": 0.09675332876085334,
+      "mae": 140.27722786539712,
+      "bias": 0.0190861043906076,
+      "coverage80": 0.8779761904761905,
+      "pinball": 56.78254876866093,
+      "mean_interval_width": 573.665923232124
+    },
+    "TimesFM + all inputs": {
+      "n": 672,
+      "wape": 0.0999278117717882,
+      "mae": 144.8797328374009,
+      "bias": 0.01115344155610041,
+      "coverage80": 0.8511904761904762,
+      "pinball": 58.98163766057978,
+      "mean_interval_width": 535.9937500045413
+    },
+    "Gradient boosting: sales": {
+      "n": 672,
+      "wape": 0.11979912546778472,
+      "mae": 173.69003667932844,
+      "bias": 0.04249662015795077,
+      "coverage80": 0.8720238095238095,
+      "pinball": 70.13355606247869,
+      "mean_interval_width": 633.601079153028
+    },
+    "Gradient boosting: calendar": {
+      "n": 672,
+      "wape": 0.12299516098914383,
+      "mae": 178.32378942807097,
+      "bias": 0.04553074622737301,
+      "coverage80": 0.8333333333333334,
+      "pinball": 72.81884232601239,
+      "mean_interval_width": 561.9895984084975
+    },
+    "Gradient boosting: all inputs": {
+      "n": 672,
+      "wape": 0.11137424444499391,
+      "mae": 161.47527394083903,
+      "bias": 0.030375995845329948,
+      "coverage80": 0.8154761904761905,
+      "pinball": 68.2425455781391,
+      "mean_interval_width": 566.2692014611132
+    }
+  },
+  "implementation": "Python standard library; does not import experiment.py or audit_results.py",
+  "limits": "Checks saved artifacts. Does not establish pretraining independence, statistical superiority, real-time promotion availability, or production suitability."
+}

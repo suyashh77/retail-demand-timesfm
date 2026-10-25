@@ -1,5 +1,5 @@
 {
-  "python_integrity_tests": 6,
+  "python_integrity_tests": 10,
   "python_integrity_tests_status": "passed",
   "report_filter_combinations": 288,
   "report_slider_ranking_checks": 2,
@@ -7,12 +7,21 @@
   "static_figures": "overview and held-out forecasts visually inspected",
   "browser_rendering": "not verified: in-app browser could not reach local preview",
   "official_checkpoint_sha256_verified": true,
-  "notebook_analysis_code_cells_executed": 6,
+  "notebook_analysis_code_cells_executed": 7,
   "published_forecast_metrics_recomputed": true,
   "published_inventory_replay_recomputed": true,
   "separate_standard_library_evidence_review": "passed; see results/review_audit.json",
   "evidence_review_forecast_rows": 8064,
   "evidence_review_inventory_rows": 2016,
+  "matched_input_correction": {
+    "new_boosting_fits": 288,
+    "forecast_rows_checked": 9408,
+    "inventory_rows_checked": 2352,
+    "arithmetic_review": "passed; see results/matched_inputs/review_audit.json",
+    "extra_history_sensitivity_fits": 96,
+    "timesfm_outputs": "reused without changing inputs or weights",
+    "validation_scope": "Correction on previously examined test dates, not a new untouched holdout"
+  },
   "fresh_github_checkout_analysis_reproduced": true,
   "fresh_github_checkout_integrity_tests": "passed",
   "fresh_github_checkout_report_logic": "passed"

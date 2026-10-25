@@ -1,4 +1,6 @@
-# Methods, evidence, and boundaries of the claims
+# Initial experiment: methods and claim boundaries
+
+The current matched-input correction is documented in [MATCHED_COMPARISON.md](MATCHED_COMPARISON.md). The methods below describe the original unequal-input exploration, whose outputs are preserved.
 
 This is an exploratory, retrospective case study. It is not a randomized study, a registered benchmark, a test of all retail forecasting methods, or evidence of actual financial savings.
 

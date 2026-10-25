@@ -1,0 +1,67 @@
+{
+  "created_utc": "2026-10-25T19:21:33.891761+00:00",
+  "purpose": "Correct unequal covariates, local history budgets and related-series access in the initial comparison",
+  "status": "Post-hoc correction on the previously examined test period; not a new untouched validation",
+  "modes": [
+    "sales",
+    "calendar",
+    "all"
+  ],
+  "families": [
+    "BEVERAGES",
+    "BREAD/BAKERY",
+    "DAIRY",
+    "GROCERY I"
+  ],
+  "context": 256,
+  "horizon": 14,
+  "calibration_origins": [
+    "2017-02-15",
+    "2017-02-22",
+    "2017-03-01",
+    "2017-03-08",
+    "2017-03-15",
+    "2017-03-22",
+    "2017-03-29",
+    "2017-04-05",
+    "2017-04-12",
+    "2017-04-19",
+    "2017-04-26",
+    "2017-05-03"
+  ],
+  "test_origins": [
+    "2017-05-17",
+    "2017-05-24",
+    "2017-05-31",
+    "2017-06-07",
+    "2017-06-14",
+    "2017-06-21",
+    "2017-06-28",
+    "2017-07-05",
+    "2017-07-12",
+    "2017-07-19",
+    "2017-07-26",
+    "2017-08-02"
+  ],
+  "boosting_parameters": {
+    "max_iter": 80,
+    "max_leaf_nodes": 15,
+    "learning_rate": 0.07,
+    "l2_regularization": 10,
+    "random_state": 42,
+    "early_stopping": false
+  },
+  "boosting_features": "28-day summaries for all four groups, horizon, plus only allowed covariates",
+  "training": "Per-family direct regressors; all features and labels inside 256-day window; 28-day warm-up inside window",
+  "no_tuning": "Parameters inherited from initial experiment; no search or adjustment after inspecting new scores",
+  "known_future": "Calendar; promotion counts assumed planned in all-input mode; no future realized transactions",
+  "upstream_pretraining": "TimesFM has external pretraining; gradient boosting fits only the local window",
+  "uncertainty": "Native TimesFM quantiles versus family-specific signed calibration-residual quantiles for boosting",
+  "reused_timesfm_predictions": true,
+  "source_forecasts_sha256": "3829a6e5c15ee8332010b5846ed4500bcd3bcfc70a29035f859640302a587c44",
+  "prepared_panel_sha256": "d9f9dfca1e8814b611f8e92b8986a26466a7f43913c93fed80da5a5cb96dec9c",
+  "sklearn": "1.8.0",
+  "numpy": "2.4.1",
+  "pandas": "2.3.3",
+  "threads": 8
+}

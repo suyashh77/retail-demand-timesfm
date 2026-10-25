@@ -30,7 +30,7 @@ def main():
             source=source.splitlines(keepends=True),outputs=outputs))
     markdown('''# Retail Demand Lab: TimesFM 3.0
 
-An executed analysis of real Favorita observations and saved official TimesFM 3.0 predictions. The forecasting run is separate from these lightweight analysis cells. See README for the full inference commands.
+An executed analysis of real Favorita observations and saved official TimesFM 3.0 predictions. The original comparison below uses unequal inputs. The matched-input correction is reported separately at the end. The forecasting runs are separate from these lightweight analysis cells. See README for the inference and correction commands.
 
 **Business question:** Do multivariate sales and extra inputs improve forecasts and inventory decisions?
 
@@ -126,6 +126,16 @@ print(sensitivity.sort_values('total_cost').groupby(['holding_rate','shortage_ra
 - Downloadable TimesFM 3.0 weights have a non-commercial, non-production license. Original data terms also apply.
 
 For exact sources, settings, full experiment rerun commands, and six integrity tests, see README.md and docs/METHODS.md.''')
+    if (ROOT/'results/matched_inputs/paired_comparison.csv').exists():
+        markdown('''## 6. Corrected comparison with matched local inputs
+
+Both workflows receive the same four sales groups, input types and 256-day local window. Gradient boosting uses in-window supervised examples with 28-day summary features. TimesFM retains its external pretraining and a different representation. This correction uses previously examined test dates, rather than a new untouched holdout. See docs/MATCHED_COMPARISON.md for the complete protocol and interpretation.''')
+        code('''pairs = pd.read_csv(root / 'results/matched_inputs/paired_comparison.csv')
+print(pairs.round(4).to_string(index=False))
+print('\\nProduct-group results:')
+print(pd.read_csv(root / 'results/matched_inputs/paired_comparison_by_family.csv').round(4).to_string(index=False))
+print('\\nLonger-history sensitivity, with a different local history budget:')
+print(pd.read_csv(root / 'results/matched_inputs/history_sensitivity/forecast_metrics.csv').round(4).to_string(index=False))''')
     notebook=dict(cells=cells,metadata=dict(kernelspec=dict(display_name='Python 3',language='python',name='python3'),
         language_info=dict(name='python',version='3.12.0')),nbformat=4,nbformat_minor=5)
     (ROOT/'project_walkthrough.ipynb').write_text(json.dumps(notebook,indent=1),encoding='utf-8')

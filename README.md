@@ -1,56 +1,42 @@
 # TimesFM 3.0 retail forecasting study
 
-[Live results](https://suyashh77.github.io/suyashsapre_portfolio/timesfm-retail/forecasts.html) · [Methods](docs/METHODS.md) · [Evidence review](docs/REVIEW.md)
+[Live matched comparison](https://suyashh77.github.io/suyashsapre_portfolio/timesfm-retail/) · [Matched methods](docs/MATCHED_COMPARISON.md) · [Initial methods](docs/METHODS.md)
 
 ## Situation
 
-Retail forecasts inform stock orders. This repository evaluates whether the pretrained TimesFM 3.0 checkpoint provides useful grocery-sales forecasts without task-specific fitting. The comparison includes a weekly-repeat rule and gradient boosting fitted to earlier sales.
+Retail forecasts inform stock orders. This study compares pretrained TimesFM 3.0 with a weekly-repeat rule and fitted gradient boosting on Favorita grocery sales. The initial headline used unequal inputs. The current comparison corrects that mismatch and also matches local history and related-series access.
 
 ## Task
 
-Compare forecast error, uncertainty estimates and a conditional inventory replay. Test whether forecasting related sales groups together, adding calendar inputs, and then adding promotions and past transactions improves the recorded forecasts.
+Compare three pairs using the same raw input types, four sales groups, 256-day local history window, fourteen-day horizon and twelve weekly test starts. TimesFM weights remain unchanged; boosting is fitted using supervised examples entirely inside each local window.
 
 ## Analysis
 
-| Element | Setup |
-| --- | --- |
-| Data | Favorita Store Sales; store 1, Quito, Ecuador |
-| Targets | Beverages, bread/bakery, dairy and grocery I |
-| Prepared period | January 2015 through August 2017 |
-| TimesFM history and horizon | 256 daily observations to predict 14 days |
-| Earlier calibration | 12 weekly starts; final target May 16, 2017 |
-| Held-out evaluation | 12 weekly starts, May 17 through August 2, 2017 |
-| Scored combinations | 672 per configuration, with overlapping target dates |
-| Comparators | Previous week repeated twice; per-family gradient boosting |
-| TimesFM configurations | Separate targets; joint targets; joint plus calendar; joint plus calendar, promotions and past transactions |
-| Inventory replay | Weekly review, seven-day lead time, buffers from earlier 14-day aggregate errors |
+The data covers store 1 in Quito, Ecuador, with beverages, bread/bakery, dairy and grocery I. Calibration uses twelve earlier starts, with its last target on May 16, 2017. Test starts run from May 17 through August 2. Each workflow has 672 scored group/start/horizon combinations, with overlapping dates.
 
-TimesFM weights remain unchanged. Gradient boosting is refitted at each forecast start using labels dated before that start. Future realized sales and transaction counts are excluded from input features. Future promotions are assumed planned because the data lacks dated plan archives. Calendar publication dates were not audited.
+Both workflows receive all four sales histories. The sales-only pair excludes other variables. The calendar pair adds weekday, annual position, applicable holidays and payday indicators. The full-input pair also receives promotion counts for all groups and historical store transactions. No future realized sales or transactions are supplied. Future promotions remain assumed known because the data lacks dated plan archives.
 
-Calendar inputs describe weekday, annual position, applicable holidays and payday indicators. Gradient boosting also receives promotion and transaction inputs absent from calendar-only TimesFM. The full-input TimesFM workflow receives the same raw input types, with a different representation. History budgets differ, so the comparison does not isolate model architecture.
-
-Exact revisions and checksums are in [source_manifest.json](data/source_manifest.json). See [METHODS.md](docs/METHODS.md) for feature construction, calibration, metrics, simulator assumptions and claim boundaries.
+Boosting uses fixed 28-day summary features and per-family direct regressors, with a warm-up inside the 256-day window. Its feature representation, fitting procedure and external pretraining differ from TimesFM. Matching local inputs does not make those model properties equivalent. See [MATCHED_COMPARISON.md](docs/MATCHED_COMPARISON.md) and [the saved protocol](results/matched_inputs/protocol.json).
 
 ## Result
 
 WAPE is total absolute forecast error divided by total recorded sales. Lower is better.
 
-| Configuration | WAPE |
-| --- | ---: |
-| Repeat the previous week | 12.56% |
-| Gradient boosting | 9.69% |
-| TimesFM, separate targets | 10.20% |
-| TimesFM, joint targets | 10.16% |
-| TimesFM, joint targets plus calendar | 9.68% |
-| TimesFM, calendar plus promotions and past transactions | 9.99% |
+| Inputs available to both models | TimesFM WAPE | Gradient boosting WAPE |
+| --- | --- | --- |
+| Sales histories only | 10.16% | 11.98% |
+| Sales + calendar | 9.68% | 12.30% |
+| Sales + calendar + promotions + past transactions | 9.99% | 11.14% |
 
-Calendar-aware TimesFM and gradient boosting had very close overall scores. TimesFM scored better on beverages and bread/bakery, while gradient boosting scored better on dairy and grocery I. Adding promotions and transactions together did not improve the calendar-only configuration. Their individual effects remain untested.
+TimesFM has lower pooled WAPE in these three shared-256-day comparisons. Product-level results are mixed: with full inputs, boosting has lower WAPE on beverages, bread/bakery and dairy, while TimesFM scores better on grocery I. Grocery I contributes about 44.6% of the scored quantity, so that group strongly affects the pooled ranking.
 
-The calendar TimesFM middle-80% range covered 87.8% of outcomes, versus 86.2% for gradient boosting. Its average range was narrower, while the nine-quantile pinball score was almost tied. Coverage alone does not identify the better uncertainty estimate.
+For the calendar pair, middle-80% interval coverage is 87.8% for TimesFM and 83.3% for boosting. Mean nine-quantile pinball loss is 56.78 versus 72.82, with lower better. TimesFM's average range is slightly wider in this pair, and coverage alone does not establish a better uncertainty estimate. Full width and quantile metrics are saved alongside the paired results.
 
-The joint-target TimesFM workflow had the lowest default simulated inventory cost, 20.4% below the weekly baseline. This result uses illustrative costs and earlier aggregate point-forecast errors to set buffers. It is not measured retailer savings or evidence that native daily prediction intervals improved orders.
+A separate history check keeps the corrected calendar boosting representation fixed and extends its local window to 365 days. WAPE changes from 12.30% to 10.82%. That longer-history workflow has more local observations than the TimesFM context and is reported separately. The old 9.69% boosting score used a different representation, extra inputs and a year of labels. It is not the matched calendar baseline.
 
-This is an exploratory, single-store historical experiment. Forecast windows overlap, no significance or equivalence test was conducted, and public data may overlap pretraining. Recorded sales can understate demand during stockouts. The inventory replay omits expiry, capacity, purchase costs and terminal valuation. The calendar configuration has not been validated as a selected winner on a second holdout.
+This is a post-hoc correction on the previously examined test dates, not a new untouched validation. It covers one store; windows overlap; sales can understate demand; future promotions are assumed known; and pretraining overlap cannot be ruled out. No significance, equivalence or general superiority claim is made. Fixed boosting settings were inherited without a new tuning search.
+
+The inventory replay applies the same weekly ordering rule and earlier aggregate-error buffer method. Its costs are illustrative, and it does not use native daily prediction intervals to set buffers. Results are in `results/matched_inputs/inventory_metrics.csv`; they are model-plus-buffer policy outcomes rather than measured retailer savings.
 
 ## Reproduce the experiment
 
@@ -64,6 +50,10 @@ python src/experiment.py --checkpoint checkpoints/timesfm3 --fresh
 python src/audit_results.py
 python src/review_evidence.py
 python src/build_report.py
+python src/matched_comparison.py --threads 8
+python src/history_sensitivity.py
+python src/review_evidence.py --matched
+python src/build_matched_report.py
 python src/build_notebook.py
 python -m unittest discover -s tests -v
 ```
@@ -83,7 +73,7 @@ python src/review_evidence.py
 python -m unittest discover -s tests -v
 ```
 
-Open `report.html` to explore saved forecasts offline. Optional report-control check with Node.js:
+Open `matched_report.html` for the current comparison. `report.html` retains the initial unequal-input exploration. Optional report-control check with Node.js:
 
 ```shell
 node tests/verify_report.cjs report.html
@@ -95,14 +85,16 @@ node tests/verify_report.cjs report.html
 | --- | --- |
 | `src/` | Data preparation, inference, scoring, inventory replay and report generation |
 | `tests/` | Temporal input boundaries, calibration separation and inventory integrity |
+| `docs/MATCHED_COMPARISON.md` | Current matched-input protocol, findings and remaining limits |
 | `docs/METHODS.md` | Exact methods and interpretation limits |
 | `docs/REVIEW.md` | Evidence checks and unresolved research questions |
 | `data/` | Source manifest and dataset description |
 | `results/` | Saved forecasts, scores, calibration buffers, simulation outputs and figures |
 | `project_walkthrough.ipynb` | Executed analysis of saved results |
-| `report.html` | Self-contained exploration of saved results |
+| `matched_report.html` | Current matched-input results |
+| `report.html` | Initial unequal-input results |
 
-Six integrity tests and 288 report-control selections pass on the recorded artifacts. A separate standard-library implementation checks 8,064 forecast rows and 2,016 inventory rows without importing the experiment's scoring functions. See [review_audit.json](results/review_audit.json). Browser layout verification was unavailable. These checks validate saved calculations within their stated scope, rather than every research assumption.
+Ten integrity tests and 288 original-report control selections pass on the recorded artifacts. A separate standard-library implementation checks 8,064 forecast rows and 2,016 inventory rows without importing the experiment's scoring functions. The matched correction checks another 9,408 forecast rows and 2,352 inventory rows; see [matched review_audit.json](results/matched_inputs/review_audit.json). Browser layout verification was unavailable. These checks validate saved calculations within their stated scope, rather than every research assumption.
 
 The implementation was developed with an AI coding assistant. Saved model predictions came from executing the official checkpoint. The notebook executes analysis of those saved outputs; it does not rerun inference.
 

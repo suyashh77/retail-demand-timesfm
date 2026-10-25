@@ -1,4 +1,8 @@
-# Evidence review: October 25, 2026
+# Evidence review: original and matched comparisons
+
+## Matched-input correction
+
+The current comparison uses three pairs with matching raw input types, four target histories and a 256-day local window. Ten integrity tests pass. The separate arithmetic audit checks 9,408 matched forecast rows and 2,352 inventory rows. See [MATCHED_COMPARISON.md](MATCHED_COMPARISON.md) and `results/matched_inputs/review_audit.json`. Original figures reviewed below describe a different, unequal-input stage and should not be used as the matched results.
 
 ## Situation
 

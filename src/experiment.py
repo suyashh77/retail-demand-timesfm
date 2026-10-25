@@ -168,7 +168,7 @@ def aggregate_buffers(predictions):
     return pd.DataFrame(records)
 
 
-def simulate_inventory(predictions, observed, holding=.01, shortage=1.):
+def simulate_inventory(predictions, observed, holding=.01, shortage=1., model_names=None):
     """Daily lost-sales replay; receive, review/order, demand, then holding cost.
 
     Weekly order-up-to policy, deterministic 7-day lead time, no capacity limit.
@@ -179,7 +179,8 @@ def simulate_inventory(predictions, observed, holding=.01, shortage=1.):
     start, end = TEST_ORIGINS.min(), TEST_ORIGINS.max()+pd.Timedelta(days=6)
     days = pd.date_range(start, end)
     rows = []
-    for model in MODEL_NAMES:
+    models = MODEL_NAMES if model_names is None else model_names
+    for model in models:
         for family in FAMILIES:
             initial = float(observed.loc[start-pd.Timedelta(days=7):start-pd.Timedelta(days=1),family].sum()*2)
             stock, pipeline = initial, []

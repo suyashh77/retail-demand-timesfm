@@ -4,6 +4,8 @@ This verifies the recorded artifacts, not the model's training lineage or every
 implementation choice. Run after preparing data and computing the results.
 """
 import csv
+import argparse
+import hashlib
 from collections import defaultdict
 from datetime import date, timedelta
 import json
@@ -30,12 +32,38 @@ def linear_quantile(values, q):
     return ordered[left] + (position - left) * (ordered[right] - ordered[left])
 
 
-def main():
-    forecasts = read('results/forecasts.csv')
+def main(matched=False):
+    directory = 'results/matched_inputs' if matched else 'results'
+    def result(name):
+        return read(f'{directory}/{name}')
+    forecasts = result('forecasts.csv')
+    if matched:
+        protocol = json.loads((ROOT / directory / 'protocol.json').read_text())
+        for filename, key in [('results/forecasts.csv', 'source_forecasts_sha256'),
+                              ('data/retail_panel.csv', 'prepared_panel_sha256')]:
+            with (ROOT / filename).open('rb') as stream:
+                assert hashlib.file_digest(stream, 'sha256').hexdigest() == protocol[key]
+        origin_audit = result('training_audit.csv')
+        assert len(origin_audit) == 72
+        for row in origin_audit:
+            origin = date.fromisoformat(row['origin'])
+            start = date.fromisoformat(row['history_start'])
+            assert start == origin - timedelta(days=256)
+            assert date.fromisoformat(row['history_end']) == origin - timedelta(days=1)
+            assert start + timedelta(days=28) <= date.fromisoformat(row['first_label'])
+            assert date.fromisoformat(row['last_label']) < origin
+        original = {(r['model'], r['origin'], r['family'], r['horizon']): r
+                    for r in read('results/forecasts.csv')}
+        for row in forecasts:
+            if row['model'].startswith('TimesFM') or row['model'] == 'Seasonal naive':
+                old = original[row['model'], row['origin'], row['family'], row['horizon']]
+                for field in ['actual', 'prediction'] + [f'q{q}' for q in range(10, 100, 10)]:
+                    close(float(row[field]), old[field])
     source = {(r['date'], r['family']): float(r['sales'])
               for r in read('data/retail_panel.csv') if r['sales']}
-    assert len(forecasts) == 8064
-    assert len({(r['model'], r['origin'], r['family'], r['horizon']) for r in forecasts}) == 8064
+    expected = (7 if matched else 6) * 24 * 4 * 14
+    assert len(forecasts) == expected
+    assert len({(r['model'], r['origin'], r['family'], r['horizon']) for r in forecasts}) == expected
     grouped, calibration, windows = defaultdict(list), defaultdict(list), defaultdict(list)
     for row in forecasts:
         origin = date.fromisoformat(row['origin'])
@@ -76,23 +104,23 @@ def main():
             mae=absolute / len(rows), bias=sum(float(r['prediction']) - float(r['actual']) for r in rows) / actual,
             coverage80=covered / len(rows), pinball=sum(losses) / len(losses),
             mean_interval_width=sum(float(r['q90']) - float(r['q10']) for r in rows) / len(rows))
-    for saved in read('results/forecast_metrics.csv'):
+    for saved in result('forecast_metrics.csv'):
         for field, value in calculated[saved['model']].items():
             close(value, saved[field])
-    for saved in read('results/metrics_by_family.csv'):
+    for saved in result('metrics_by_family.csv'):
         rows = [r for r in grouped[saved['model']] if r['family'] == saved['family']]
         close(sum(abs(float(r['actual']) - float(r['prediction'])) for r in rows)
               / sum(float(r['actual']) for r in rows), saved['wape'])
 
     for row in forecasts:
-        if row['model'] in ('Seasonal naive', 'Gradient boosting'):
+        if row['model'] == 'Seasonal naive' or row['model'].startswith('Gradient boosting'):
             errors = calibration[row['model'], row['family']]
             for percentile in range(10, 100, 10):
                 close(max(0, float(row['prediction']) + linear_quantile(errors, percentile / 100)),
                       row[f'q{percentile}'])
 
     buffers = {}
-    for saved in read('results/aggregate_error_buffers.csv'):
+    for saved in result('aggregate_error_buffers.csv'):
         key = saved['model'], saved['family']
         totals = [sum(float(r['actual']) - float(r['prediction']) for r in rows)
                   for window_key, rows in windows.items()
@@ -103,7 +131,7 @@ def main():
         buffers[key] = buffer
 
     daily = defaultdict(list)
-    for r in read('results/inventory_daily.csv'):
+    for r in result('inventory_daily.csv'):
         daily[r['model'], r['family']].append(r)
     inventory_totals = defaultdict(lambda: defaultdict(float))
     for key, rows in daily.items():
@@ -138,7 +166,7 @@ def main():
                 totals[field] += float(r[field])
             totals['lost_sales'] += float(r['lost'])
             totals['average_inventory'] += stock / (84 * 4)
-    for saved in read('results/inventory_metrics.csv'):
+    for saved in result('inventory_metrics.csv'):
         totals = inventory_totals[saved['model']]
         totals['fill_rate'] = 1 - totals['lost_sales'] / totals['demand']
         for field, value in totals.items():
@@ -158,9 +186,11 @@ def main():
         implementation='Python standard library; does not import experiment.py or audit_results.py',
         limits='Checks saved artifacts. Does not establish pretraining independence, statistical superiority, '
                'real-time promotion availability, or production suitability.')
-    (ROOT / 'results/review_audit.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
+    (ROOT / directory / 'review_audit.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
     print(json.dumps(summary, indent=2))
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--matched', action='store_true', help='Audit the matched-input correction instead of the original run')
+    main(parser.parse_args().matched)
